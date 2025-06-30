@@ -8,7 +8,8 @@ Its development was based on version 3.2 of Keycloak, whose documentation can be
 
 Publication of gem: https://rubygems.org/gems/keycloak
 
-Exemple: https://github.com/imagov/example-gem-keycloak
+Example: https://github.com/imagov/example-gem-keycloak
+
 
 ## Installation
 
@@ -152,7 +153,10 @@ To authenticate the users of your application using a template configured in Key
 Keycloak::Client.get_token_by_code(code, redirect_uri, client_id = '', secret = '')
 ```
 
-When using the `Keycloak::Client.url_login_redirect` method to get a `code`, pass it as a parameter in this method so that Keycloak returns a token, thus logging the user in the application. The second parameter (`redirect_uri`) must be passed so that when a token is made available, Keycloak redirects to the url informed.
+When using the `Keycloak::Client.url_login_redirect` method to get a `code`, pass it as a parameter in this method so that Keycloak returns a token, thus logging the user in the application. The second parameter (`redirect_uri`) must be the same one used in the call for `Keycloak::Client.url_login_redirect(redirect_uri, response_type = 'code')`.
+
+> If `redirect_uri` are not equal on both calls,  `Keycloak::Client.url_login_redirect` and `Keycloak::Client.get_token_by_code` you will receive the following error:
+> `{"error":"invalid_grant","error_description":"Incorrect redirect_uri"}`
 
 
 ```ruby
@@ -177,7 +181,7 @@ When the user is already logged in and your application internally tracks the to
 
 
 ```ruby
-Keycloak::Client.get_token_introspection(token = '', client_id = '', secret = '', token_introspection_endpoint = '')
+Keycloak::Client.get_token_introspection(token = '', client_id = '', secret = '', introspection_endpoint = '')
 ```
 
 This method returns the information from the `token` session passed as parameter. Among the information returned, the most important is the `active` field, since it informs whether the token session passed in the parameter is active or not. This will help your application control whether the logged-in user session has expired or not. If no token is passed as a parameter, gem will use the last `access_token` stored in the application's cookie.
@@ -212,14 +216,14 @@ Returns the <b>url</b> for access to the realm user registry of the installation
 
 
 ```ruby
-Keycloak::Client.has_role?(user_role, access_token = '', client_id = '', secret = '', token_introspection_endpoint = '')
+Keycloak::Client.has_role?(user_role, access_token = '', client_id = '', secret = '', introspection_endpoint = '')
 ```
 
 The `has_role?` method decodes the JWT `access_token` and verifies that the user who owns the token has the <b>role</b> informed in the `user_role` parameter. If `access_token` is not informed then gem will use the `access_token` of the cookie.
 
 
 ```ruby
-Keycloak::Client.user_signed_in?(access_token = '', client_id = '', secret = '', token_introspection_endpoint = '')
+Keycloak::Client.user_signed_in?(access_token = '', client_id = '', secret = '', introspection_endpoint = '')
 ```
 
 This method checks whether the `access_token` passed in the parameter is still active. To check whether the user is active or not, the gem invokes the `get_token_introspection` method internally. If `access_token` is not informed then gem will use the `access_token` of the cookie.
